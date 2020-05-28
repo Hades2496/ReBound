@@ -26,22 +26,25 @@ function love.load()
         resizable = false
     })
 
-    YSBG = love.audio.newSource("Sound/YouSeeBIGGIRL.mkv", "stream")
-    -- YSBG:play()
-
     soundSlider = { value = 5, min = 0, max = 10 }
     musicSlider = { value = 5, min = 0, max = 10 }
+
+    startTimer = 0
 
     inSettings = false
     paused = false
 end
 
 function love.update(dt)
+    if ui.GameStarted and startTimer > 1 then
+        startTimer = startTimer - dt
+    end
+
     if inSettings then
         set:update(dt)
     end
 
-    if not inSettings then
+    if not inSettings and not ui.GameStarted then
         ui:update(dt)
     end
 
@@ -58,7 +61,7 @@ function love.update(dt)
     end
 
     if not paused then
-        if ui.GameStarted then
+        if ui.GameStarted and startTimer <= 1 then
             player:update(dt)
             map:update(dt)
             
@@ -79,7 +82,9 @@ function love.draw()
     end
 
     if ui.GameStarted then
-        map:draw()
+        if not inSettings then
+            map:draw()
+        end
         player:draw()
 
         for i, v in ipairs(Enemies) do

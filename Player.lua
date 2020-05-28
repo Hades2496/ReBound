@@ -171,9 +171,7 @@ function Player:draw()
     if killed then
         love.graphics.draw(self.psystem, x, y)
     end
-    love.graphics.print("speed: " .. self.speed, 10, 50)
-    love.graphics.print("cos: " .. self.cos, 10, 30)
-    love.graphics.print("Sin: " .. self.sin, 10, 10)
+
     love.graphics.draw(self.Image, self.x, self.y)
     love.graphics.draw(self.ArrowImage, self.x + self.Rad, self.y + self.Rad, self.ArrowRotation, 1, 1, self.OriginX, self.OriginY)
 end
