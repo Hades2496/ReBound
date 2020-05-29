@@ -13,10 +13,8 @@ function Settings:update(dt)
     if suit.ImageButton(self.backArrow, 10, 10).hit and paused then
         inSettings = false
         paused = false
-        isInSettingsInGame = false
     elseif suit.ImageButton(self.backArrow, 10, 10).hit then
         inSettings = false
-        isInSettingsInGame = false
         paused = true
     end
 end 

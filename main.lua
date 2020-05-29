@@ -14,6 +14,7 @@ function love.load()
     require "Barriers"
     require "UI/MainUI"
     require "UI/SettingsTab"
+    require "UI/WinningUI"
 
     ui = UI()
 
@@ -31,13 +32,47 @@ function love.load()
 
     startTimer = 0
 
-    isInSettingsInGame = false
     inSettings = false
     paused = false
+
+    didWin = false
+    didLose = false
+
+    constructEndUI = 0
+
+    enemyCount = 6
 end
 
 function love.update(dt)
-    if ui.GameStarted and startTimer > 1 then
+    if enemyCount <= 1 then
+        didWin = true
+        constructEndUI = 1
+    elseif ui.GameStarted then
+        if player.health <= 0 then
+            didLose = true
+            constructEndUI = 2
+        end
+    end
+
+    if constructEndUI == 1 then
+        winUI = WinUI()
+        -- constructEndUI = 0
+        player.health = 1
+        enemyCount = 1
+    elseif constructEndUI == 2 then
+        loseUI = LoseUI()
+        -- constructEndUI = 0
+        player.health = 1
+        enemyCount = 1
+    end
+
+    if didWin then
+        winUI = WinUI()
+    elseif didLose then
+        loseUI = LoseUI()
+    end
+
+    if ui.GameStarted and startTimer > 1 and not paused then
         startTimer = startTimer - dt
     end
 
@@ -49,13 +84,13 @@ function love.update(dt)
         ui:update(dt)
     end
 
-    if ui.Constructor then
+    if ui.Constructor and not inSettings then
         player = Player()
         map = Map(360)
 
         Enemies = {}
         
-        for i = 1, 6 do
+        for i = 1, enemyCount do
             table.insert(Enemies, Enemy())
         end
         ui.Constructor = false
@@ -74,6 +109,12 @@ function love.update(dt)
 end 
 
 function love.draw()
+    if didWin then
+        winUI:draw()
+    elseif didLose then
+        loseUI:draw()
+    end
+
     if inSettings then
         set:draw()
     end
@@ -86,12 +127,16 @@ function love.draw()
         if not inSettings then
             map:draw()
             player:draw()
+            
+            for i, v in ipairs(Enemies) do
+                v:draw()
+            end 
         end
-
-        for i, v in ipairs(Enemies) do
-            v:draw()
-        end 
     end
+    love.graphics.print(enemyCount, 10, 10)
+    love.graphics.print(tostring(didWin), 10, 30)
+    love.graphics.print(tostring(didLose), 10, 50)
+    love.graphics.print(constructEndUI, 10, 70)
 end
 
 function love.keypressed(key)

@@ -16,16 +16,15 @@ function Map:new(R)
 end
 
 function Map:update(dt)
-    if suit.Button("Pause", 10, 10, 80, 50).hit then
-        paused = true
+    if suit.Button("Pause", 10, 10, 100, 50).hit then
         set = Settings()
         inSettings = true
-        isInSettingsInGame = true
-    end
+        paused = true
+        startTimer = 3
+    end 
 end
 
 function Map:draw()
-    suit.draw()
     love.graphics.setBackgroundColor(40 / 255, 45 / 255, 52 / 255, 1)
     love.graphics.circle('line', WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, self.R)
     self:DisplayFPS(10, WINDOW_HEIGHT - 30)

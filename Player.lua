@@ -4,7 +4,7 @@ function Player:new()
     self.Image = love.graphics.newImage("Images/PlayerImage.png")
     self.ArrowImage = love.graphics.newImage("Images/Arrow.png")
 
-    self.ArrowRotation = 0
+    self.ArrowRotation = math.rad(math.random(360))
     self.Rad = self.Image:getWidth() / 2
 
     self.width = self.Image:getWidth()
@@ -13,8 +13,8 @@ function Player:new()
     self.x = 500
     self.y = 250
 
-    self.cos = math.random(-1, 1)
-    self.sin = math.random(-1, 1)
+    self.cos = math.cos(self.ArrowRotation)
+    self.sin = math.sin(self.ArrowRotation)
 
     self.angCos = self.cos
     self.angSin = self.sin
@@ -137,9 +137,8 @@ function Player:update(dt)
             x = v.x
             y = v.y
             killed = true
-            if self.speed < 500 then
-                self:Collided()
-            end
+            self:Collided()
+            enemyCount = enemyCount - 1
         end
     end 
 
