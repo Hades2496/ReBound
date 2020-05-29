@@ -26,7 +26,7 @@ function Player:new()
     self.turnRate = 0.025
     self.OSpeed = 0
 
-    self.health = 10
+    self.health = 5
 
     self.SpeedIncRate = 1.1  
     self.SpeedDecRate = 0.7
@@ -50,6 +50,8 @@ function Player:new()
     killed = false
 
     self.followMouse = false
+
+    self.canBoost = false
 end
 
 function Player:update(dt)
@@ -120,9 +122,11 @@ function Player:update(dt)
     elseif love.keyboard.isDown('e') then
         self.ArrowRotation = self.ArrowRotation + self.turnRate
     elseif love.keyboard.isDown("lshift") then
-        -- TODO
+        self.angSin = self.angSin - 0.025
+        self.speed = self.speed + 0.25
     elseif love.keyboard.isDown('lalt') then
-        -- TODO
+        self.angSin = self.angSin + 0.025
+        self.speed = self.speed - 0.25
     end
 
     self.cos = math.cos(self.ArrowRotation)

@@ -6,10 +6,10 @@ function Map:new(R)
 
     self.Barriers = {}
 
-    table.insert(self.Barriers, Barrier(100, 100))
-    table.insert(self.Barriers, Barrier(400, 350))
-    table.insert(self.Barriers, Barrier(700, 200))
-    table.insert(self.Barriers, Barrier(1100, 150))
+    -- table.insert(self.Barriers, Barrier(100, 100))
+    -- table.insert(self.Barriers, Barrier(400, 350))
+    -- table.insert(self.Barriers, Barrier(700, 200))
+    -- table.insert(self.Barriers, Barrier(1100, 150))
 end
 
 function Map:update(dt)

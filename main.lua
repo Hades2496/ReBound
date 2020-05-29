@@ -90,11 +90,11 @@ function love.update(dt)
         Enemies = {}
         
         table.insert(Enemies, Enemy(150, 150))
-        -- table.insert(Enemies, Enemy(235, 300))
-        -- table.insert(Enemies, Enemy(589, 221))
-        -- table.insert(Enemies, Enemy(454, 632))
-        -- table.insert(Enemies, Enemy(930, 432))
-        -- table.insert(Enemies, Enemy(877, 150))
+        table.insert(Enemies, Enemy(235, 300))
+        table.insert(Enemies, Enemy(589, 221))
+        table.insert(Enemies, Enemy(454, 632))
+        table.insert(Enemies, Enemy(930, 432))
+        table.insert(Enemies, Enemy(877, 150))
         ui.Constructor = false
     end
 
