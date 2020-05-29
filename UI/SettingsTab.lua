@@ -13,16 +13,16 @@ function Settings:update(dt)
     if suit.ImageButton(self.backArrow, 10, 10).hit and paused then
         inSettings = false
         paused = false
-        Map.isInSettingsinGame = false
-    elseif not suit.ImageButton(self.backArrow, 10, 10).hit then
+        isInSettingsInGame = false
+    elseif suit.ImageButton(self.backArrow, 10, 10).hit then
         inSettings = false
-        Map.isInSettingsinGame = false
+        isInSettingsInGame = false
+        paused = true
     end
 end 
 
 function Settings:draw()
     suit.draw()
-    love.graphics.print(tostring(paused))
     love.graphics.draw(self.soundImage, WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT / 2 - 30)
     love.graphics.draw(self.musicImage, WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT / 2)
 

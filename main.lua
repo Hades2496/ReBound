@@ -31,6 +31,7 @@ function love.load()
 
     startTimer = 0
 
+    isInSettingsInGame = false
     inSettings = false
     paused = false
 end
@@ -84,8 +85,8 @@ function love.draw()
     if ui.GameStarted then
         if not inSettings then
             map:draw()
+            player:draw()
         end
-        player:draw()
 
         for i, v in ipairs(Enemies) do
             v:draw()

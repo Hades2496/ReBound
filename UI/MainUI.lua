@@ -16,7 +16,7 @@ function UI:update(dt)
     if suit.Button("Shop", WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 25, 100, 50).hit then
     
     end
-
+    
     if suit.ImageButton(self.SettingsImage, 10, 10).hit then
         set = Settings()
         inSettings = true
