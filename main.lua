@@ -5,7 +5,7 @@ function love.load()
     math.randomseed(os.time())
 
     Class = require "class"
-    suit = require "suit"
+    suit = require "SUIT"
 
     require "Map"
     require "Player"
@@ -14,7 +14,6 @@ function love.load()
     require "Barriers"
     require "UI/MainUI"
     require "UI/SettingsTab"
-    require "UI/WinningUI"
 
     ui = UI()
 
@@ -27,49 +26,48 @@ function love.load()
         resizable = false
     })
 
+    GameSpeed = 1
+    SlowMo = 1
+
     soundSlider = { value = 5, min = 0, max = 10 }
-    musicSlider = { value = 5, min = 0, max = 10 }
+    musicSlider = { value = 2, min = 0, max = 10 }
 
     startTimer = 0
-
+    
     inSettings = false
     paused = false
 
     didWin = false
     didLose = false
 
-    constructEndUI = 0
+    YSBG = love.audio.newSource("Sound/YouSeeBIGGIRL.mp3", "stream")
 
-    enemyCount = 6
+    YSBG:play()
 end
 
 function love.update(dt)
-    if enemyCount <= 1 then
-        didWin = true
-        constructEndUI = 1
-    elseif ui.GameStarted then
-        if player.health <= 0 then
-            didLose = true
-            constructEndUI = 2
-        end
-    end
+    YSBG:setVolume(musicSlider.value / 10)
 
-    if constructEndUI == 1 then
-        winUI = WinUI()
-        -- constructEndUI = 0
-        player.health = 1
-        enemyCount = 1
-    elseif constructEndUI == 2 then
-        loseUI = LoseUI()
-        -- constructEndUI = 0
-        player.health = 1
-        enemyCount = 1
+    if ui.GameStarted and #Enemies <= 0 then
+        didWin = true
+    elseif ui.GameStarted and player.health <= 0 then
+        didLose = true
     end
 
     if didWin then
-        winUI = WinUI()
+        suit.Label("YouWin!!", WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 - 75, 100, 50)
+        if suit.Button("Click here to restart the game", { align = "center" }, WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 25, 200, 50).hit then
+            restartGame()
+        elseif suit.Button("Click here to reset the game", { align = "center" }, WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 + 30, 200, 50).hit then
+            resetGame()
+        end
     elseif didLose then
-        loseUI = LoseUI()
+        suit.Label("YouLost....", WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 - 75, 100, 50)
+        if suit.Button("Click here to restart the game", { align = "center" }, WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 25, 200, 50).hit then
+            restartGame()
+        elseif suit.Button("Click here to reset the game", { align = "center" }, WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 + 30, 200, 50).hit then
+            resetGame()
+        end
     end
 
     if ui.GameStarted and startTimer > 1 and not paused then
@@ -82,6 +80,7 @@ function love.update(dt)
 
     if not inSettings and not ui.GameStarted then
         ui:update(dt)
+        suit.Label("No sound effects yet OBV", WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 100, 100, 50)
     end
 
     if ui.Constructor and not inSettings then
@@ -90,14 +89,17 @@ function love.update(dt)
 
         Enemies = {}
         
-        for i = 1, enemyCount do
-            table.insert(Enemies, Enemy())
-        end
+        table.insert(Enemies, Enemy(150, 150))
+        -- table.insert(Enemies, Enemy(235, 300))
+        -- table.insert(Enemies, Enemy(589, 221))
+        -- table.insert(Enemies, Enemy(454, 632))
+        -- table.insert(Enemies, Enemy(930, 432))
+        -- table.insert(Enemies, Enemy(877, 150))
         ui.Constructor = false
     end
 
     if not paused then
-        if ui.GameStarted and startTimer <= 1 then
+        if ui.GameStarted and startTimer <= 1 and didWin == false and didLose == false then
             player:update(dt)
             map:update(dt)
             
@@ -109,12 +111,7 @@ function love.update(dt)
 end 
 
 function love.draw()
-    if didWin then
-        winUI:draw()
-    elseif didLose then
-        loseUI:draw()
-    end
-
+    suit.draw()
     if inSettings then
         set:draw()
     end
@@ -124,7 +121,7 @@ function love.draw()
     end
 
     if ui.GameStarted then
-        if not inSettings then
+        if not inSettings and didLose == false and didWin == false then
             map:draw()
             player:draw()
             
@@ -133,10 +130,14 @@ function love.draw()
             end 
         end
     end
-    love.graphics.print(enemyCount, 10, 10)
-    love.graphics.print(tostring(didWin), 10, 30)
-    love.graphics.print(tostring(didLose), 10, 50)
-    love.graphics.print(constructEndUI, 10, 70)
+
+    love.graphics.print("here", WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT, 25)
+
+    if not inSettings and startTimer > 1 and ui.GameStarted then
+        love.graphics.setFont(love.graphics.newFont(30))
+        love.graphics.print(math.floor(startTimer), WINDOW_WIDTH / 2 - 20, WINDOW_HEIGHT / 2 - 6)
+        love.graphics.setFont(love.graphics.newFont(12))
+    end
 end
 
 function love.keypressed(key)
@@ -155,7 +156,7 @@ function love.keypressed(key)
             if SlowMo < 1 then
                 SlowMo = 1
             else
-                Slowmo = 0.1
+                SlowMo = 0.1
             end
         end
     end
@@ -187,6 +188,7 @@ function love.mousepressed(x, y, button, isTouch)
 
         if button == 2 then
             player.followMouse = true
+            -- player.OSpeed = player.speed
         end
     end
 end
@@ -194,5 +196,32 @@ end
 function love.mousereleased(x, y, button, isTouch)
     if button == 2 then
         player.followMouse = false
+        -- player.speed = player.OSpeed
     end
+end
+
+function resetGame()
+    ui = UI()
+    ui.Constructor = false
+    ui.GameStarted = false
+
+    startTimer = 3
+
+    inSettings = false
+    paused = false
+
+    didWin = false
+    didLose = false
+end
+
+function restartGame()
+    startTimer = 3
+
+    ui.Constructor = true
+
+    inSettings = false
+    paused = false
+
+    didWin = false
+    didLose = false
 end

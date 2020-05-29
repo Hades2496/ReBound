@@ -1,13 +1,13 @@
 Enemy = Class:extend()
 
-function Enemy:new()
+function Enemy:new(X, Y)
     self.image = love.graphics.newImage("Images/Enemy.png")
 
     self.width = self.image:getWidth()
     self.height = self.image:getHeight()
 
-    self.x = math.random(0, WINDOW_WIDTH - self.width)
-    self.y = math.random(0, WINDOW_HEIGHT - self.height)    
+    self.x = X
+    self.y = Y    
 
     self.DelayBetweenShots = math.random(1, 2)
 

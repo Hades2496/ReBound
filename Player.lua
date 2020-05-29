@@ -24,10 +24,11 @@ function Player:new()
 
     self.speed = 300
     self.turnRate = 0.025
+    self.OSpeed = 0
 
-    self.health = 1000
+    self.health = 10
 
-    self.SpeedIncRate = 1.3   
+    self.SpeedIncRate = 1.1  
     self.SpeedDecRate = 0.7
 
     self.abilityPos = {}
@@ -52,8 +53,14 @@ function Player:new()
 end
 
 function Player:update(dt)
+    if self.speed > 1000 then
+        self.speed = 1000
+    end
+
     if self.followMouse and not self:IsInRange(love.mouse.getY(), love.mouse.getX(), 50) then
         self.ArrowRotation = math.atan2(love.mouse.getY() - self.y, love.mouse.getX() - self.x)
+        self.angCos = math.cos(self.ArrowRotation)
+        self.angSin = math.sin(self.ArrowRotation)
     end
 
     if killed then
@@ -138,16 +145,11 @@ function Player:update(dt)
             y = v.y
             killed = true
             self:Collided()
-            enemyCount = enemyCount - 1
         end
     end 
 
     for i, v in ipairs(map.Barriers) do
         self:OverlapWithBarrier(v)
-    end
-    
-    if self.health <= 0 then
-        love.load()
     end
 
     self:CollisionWithWall()
@@ -170,6 +172,10 @@ function Player:draw()
     if killed then
         love.graphics.draw(self.psystem, x, y)
     end
+
+    love.graphics.setFont(love.graphics.newFont(30))
+    love.graphics.print(self.health, WINDOW_WIDTH - 50, 10)
+    love.graphics.setFont(love.graphics.newFont(12))
 
     love.graphics.draw(self.Image, self.x, self.y)
     love.graphics.draw(self.ArrowImage, self.x + self.Rad, self.y + self.Rad, self.ArrowRotation, 1, 1, self.OriginX, self.OriginY)

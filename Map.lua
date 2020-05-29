@@ -4,9 +4,6 @@ function Map:new(R)
     self.pauseImage = love.graphics.newImage("Images/Pause.png")
     self.R = R
 
-    GameSpeed = 1
-    SlowMo = 1
-
     self.Barriers = {}
 
     table.insert(self.Barriers, Barrier(100, 100))

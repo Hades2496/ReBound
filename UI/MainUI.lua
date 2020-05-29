@@ -5,6 +5,7 @@ function UI:new()
     self.GameStarted = false
 
     self.SettingsImage = love.graphics.newImage("Images/SettingsImage.png")
+    self.tmp = false
 end
 
 function UI:update(dt)
@@ -14,7 +15,7 @@ function UI:update(dt)
     end
 
     if suit.Button("Shop", WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 25, 100, 50).hit then
-    
+        self.tmp = true
     end
     
     if suit.ImageButton(self.SettingsImage, 10, 10).hit then
@@ -24,5 +25,7 @@ function UI:update(dt)
 end
 
 function UI:draw()
-    suit.draw()
+    if self.tmp and not self.GameStarted and not inSettings then
+        love.graphics.print("No shop yet", WINDOW_WIDTH / 2 + 55, WINDOW_HEIGHT / 2 + 44)
+    end
 end

@@ -15,12 +15,11 @@ function Settings:update(dt)
         paused = false
     elseif suit.ImageButton(self.backArrow, 10, 10).hit then
         inSettings = false
-        paused = true
+        paused = false
     end
 end 
 
 function Settings:draw()
-    suit.draw()
     love.graphics.draw(self.soundImage, WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT / 2 - 30)
     love.graphics.draw(self.musicImage, WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT / 2)
 
