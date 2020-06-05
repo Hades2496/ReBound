@@ -1,5 +1,7 @@
-WINDOW_WIDTH = 1400
-WINDOW_HEIGHT = 800
+SCALE_FACTOR = 2
+
+WINDOW_WIDTH = 1280 * SCALE_FACTOR
+WINDOW_HEIGHT = 720 * SCALE_FACTOR
 
 function love.load()
     math.randomseed(os.time())
@@ -12,16 +14,18 @@ function love.load()
     require "Enemy"
     require "Bullet"
     require "Barriers"
+    require "Camera"
     require "UI/MainUI"
     require "UI/SettingsTab"
+    require "UI/Shop"
 
     ui = UI()
 
     ability = false
     posCounter = 0
 
-    love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, {
-        fullscreen = false,
+    love.window.setMode(WINDOW_WIDTH / SCALE_FACTOR, WINDOW_HEIGHT / SCALE_FACTOR, {
+        fullscreen = falsee,
         vsync = true,
         resizable = false
     })
@@ -30,15 +34,19 @@ function love.load()
     SlowMo = 1
 
     soundSlider = { value = 5, min = 0, max = 10 }
-    musicSlider = { value = 2, min = 0, max = 10 }
+    musicSlider = { value = 0.75, min = 0, max = 10 }
 
-    startTimer = 0
+    startTimer = 3
     
+    inShop = false
     inSettings = false
     paused = false
 
     didWin = false
     didLose = false
+
+    credit = 10000
+    abilities = { canSlowmo = false, canTmp = false, canFollowMouse = true }
 
     YSBG = love.audio.newSource("Sound/YouSeeBIGGIRL.mp3", "stream")
 
@@ -48,6 +56,16 @@ end
 function love.update(dt)
     YSBG:setVolume(musicSlider.value / 10)
 
+    if ui.GameStarted then
+       if player.x > love.graphics.getWidth() / 2 then
+            camera.x = player.x - love.graphics.getWidth() / 2
+       end
+
+       if player.y > love.graphics.getHeight() / 2 then
+            camera.y = player.y - love.graphics.getHeight() / 2
+       end
+    end
+
     if ui.GameStarted and #Enemies <= 0 then
         didWin = true
     elseif ui.GameStarted and player.health <= 0 then
@@ -55,17 +73,21 @@ function love.update(dt)
     end
 
     if didWin then
-        suit.Label("YouWin!!", WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 - 75, 100, 50)
-        if suit.Button("Click here to restart the game", { align = "center" }, WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 25, 200, 50).hit then
+        camera.x = 0
+        camera.y = 0
+        suit.Label("YouWin!!", WINDOW_WIDTH / (2 * SCALE_FACTOR) - 50, WINDOW_HEIGHT / (2 * SCALE_FACTOR) - 75, 100, 50)
+        if suit.Button("Restart", { align = "center" }, WINDOW_WIDTH / (2 * SCALE_FACTOR) - 100, WINDOW_HEIGHT / (2 * SCALE_FACTOR) - 25, 200, 50).hit then
             restartGame()
-        elseif suit.Button("Click here to reset the game", { align = "center" }, WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 + 30, 200, 50).hit then
+        elseif suit.Button("Main Menu", { align = "center" }, WINDOW_WIDTH / (2 * SCALE_FACTOR) - 100, WINDOW_HEIGHT / (2 * SCALE_FACTOR) + 30, 200, 50).hit then
             resetGame()
         end
     elseif didLose then
-        suit.Label("YouLost....", WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 - 75, 100, 50)
-        if suit.Button("Click here to restart the game", { align = "center" }, WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 25, 200, 50).hit then
+        camera.x = 0
+        camera.y = 0
+        suit.Label("YouLost....", WINDOW_WIDTH / (2 * SCALE_FACTOR) - 50, WINDOW_HEIGHT / (2 * SCALE_FACTOR) - 75, 100, 50)
+        if suit.Button("Restart", { align = "center" }, WINDOW_WIDTH / (2 * SCALE_FACTOR) - 100, WINDOW_HEIGHT / (2 * SCALE_FACTOR) - 25, 200, 50).hit then
             restartGame()
-        elseif suit.Button("Click here to reset the game", { align = "center" }, WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 + 30, 200, 50).hit then
+        elseif suit.Button("Main Menu", { align = "center" }, WINDOW_WIDTH / (2 * SCALE_FACTOR) - 100, WINDOW_HEIGHT / (2 * SCALE_FACTOR) + 30, 200, 50).hit then
             resetGame()
         end
     end
@@ -78,26 +100,27 @@ function love.update(dt)
         set:update(dt)
     end
 
-    if not inSettings and not ui.GameStarted then
-        ui:update(dt)
-        suit.Label("No sound effects yet OBV", WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 100, 100, 50)
+    if inShop then
+        shop:update(dt)
     end
-
+    
+    if not inSettings and not ui.GameStarted and not inShop then
+        ui:update(dt)
+    end
+    
     if ui.Constructor and not inSettings then
         player = Player()
         map = Map(360)
-
+        
         Enemies = {}
         
-        table.insert(Enemies, Enemy(150, 150))
-        table.insert(Enemies, Enemy(235, 300))
-        table.insert(Enemies, Enemy(589, 221))
-        table.insert(Enemies, Enemy(454, 632))
-        table.insert(Enemies, Enemy(930, 432))
-        table.insert(Enemies, Enemy(877, 150))
+        for i = 1, 6 do
+            table.insert(Enemies, Enemy(math.random(0, WINDOW_WIDTH), math.random(0, WINDOW_HEIGHT)))
+        end
+
         ui.Constructor = false
     end
-
+    
     if not paused then
         if ui.GameStarted and startTimer <= 1 and didWin == false and didLose == false then
             player:update(dt)
@@ -111,15 +134,14 @@ function love.update(dt)
 end 
 
 function love.draw()
+    camera:set()
+        
     suit.draw()
+
     if inSettings then
         set:draw()
     end
-
-    if not inSettings then
-        ui:draw()
-    end
-
+    
     if ui.GameStarted then
         if not inSettings and didLose == false and didWin == false then
             map:draw()
@@ -130,14 +152,14 @@ function love.draw()
             end 
         end
     end
-
-    love.graphics.print("here", WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT, 25)
-
+    
     if not inSettings and startTimer > 1 and ui.GameStarted then
         love.graphics.setFont(love.graphics.newFont(30))
-        love.graphics.print(math.floor(startTimer), WINDOW_WIDTH / 2 - 20, WINDOW_HEIGHT / 2 - 6)
+        love.graphics.print(math.floor(startTimer), WINDOW_WIDTH / (2 * SCALE_FACTOR) - 20, WINDOW_HEIGHT / (2 * SCALE_FACTOR) - 6)
         love.graphics.setFont(love.graphics.newFont(12))
     end
+
+    camera:unset()
 end
 
 function love.keypressed(key)
@@ -145,58 +167,20 @@ function love.keypressed(key)
         love.event.quit()
     end
 
-    if ui.GameStarted then
-        player:setAngleWithWASD(key)
-
-        if key == 'g' and ability == false and player.spec == false then
-            ability = true
-        end
-
-        if key == 'r' and ability == false and player.spec == false then
-            if SlowMo < 1 then
-                SlowMo = 1
-            else
-                SlowMo = 0.1
-            end
-        end
+    if ui.GameStarted and startTimer < 1 then
+        player:keypressed(key)
     end
 end
 
 function love.mousepressed(x, y, button, isTouch)
-    if ui.GameStarted then
-        if ability and posCounter < 6 then
-            if x < (player.Rad * 2) + 1 then
-                x = (player.Rad * 2) + 1
-            elseif x > WINDOW_WIDTH - (player.Rad * 2) - 1 then
-                x = WINDOW_WIDTH - (player.Rad * 2) - 1
-            end
-
-            if y < (player.Rad * 2) + 1 then
-                y = (player.Rad * 2) + 1
-            elseif y > WINDOW_HEIGHT - (player.Rad * 2) - 1 then
-                y = WINDOW_HEIGHT - (player.Rad * 2) - 1
-            end
-
-            table.insert(player.abilityPos, { x, y })
-            posCounter = posCounter + 1 
-        end
-
-        if posCounter >= 6 then
-            posCounter = 0
-            ability = false
-        end
-
-        if button == 2 then
-            player.followMouse = true
-            -- player.OSpeed = player.speed
-        end
+    if ui.GameStarted and startTimer < 1 then
+        player:mousepressed(x, y, button, isTouch)
     end
 end
 
 function love.mousereleased(x, y, button, isTouch)
     if button == 2 then
         player.followMouse = false
-        -- player.speed = player.OSpeed
     end
 end
 

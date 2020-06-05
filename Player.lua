@@ -2,7 +2,7 @@ Player = Class:extend()
 
 function Player:new()
     self.Image = love.graphics.newImage("Images/PlayerImage.png")
-    self.ArrowImage = love.graphics.newImage("Images/Arrow.png")
+    self.ArrowImage = love.graphics.newImage("Images/arrow.jpg")
 
     self.ArrowRotation = math.rad(math.random(360))
     self.Rad = self.Image:getWidth() / 2
@@ -26,7 +26,7 @@ function Player:new()
     self.turnRate = 0.025
     self.OSpeed = 0
 
-    self.health = 5
+    self.health = 1
 
     self.SpeedIncRate = 1.1  
     self.SpeedDecRate = 0.7
@@ -45,7 +45,6 @@ function Player:new()
     self.psystem:setLinearAcceleration(-400, -400, 400, 400)
     self.psystem:setColors(1, 1, 1, 1, 1, 1, 1, 0)
 
-    x, y = 0, 0
     PSTimer = 0.3
     killed = false
 
@@ -57,10 +56,15 @@ end
 function Player:update(dt)
     if self.speed > 1000 then
         self.speed = 1000
+    elseif self.speed < 300 then
+        self.canBoost = true
+    else
+        self.canBoost = false
     end
 
-    if self.followMouse and not self:IsInRange(love.mouse.getY(), love.mouse.getX(), 50) then
-        self.ArrowRotation = math.atan2(love.mouse.getY() - self.y, love.mouse.getX() - self.x)
+    if self.followMouse-- and self:IsInRange(love.mouse.getY() * SCALE_FACTOR, love.mouse.getX() * SCALE_FACTOR, 50) 
+    then
+        self.ArrowRotation = math.atan2(love.mouse.getY() * SCALE_FACTOR - self.y, love.mouse.getX() * SCALE_FACTOR - self.x)
         self.angCos = math.cos(self.ArrowRotation)
         self.angSin = math.sin(self.ArrowRotation)
     end
@@ -122,11 +126,9 @@ function Player:update(dt)
     elseif love.keyboard.isDown('e') then
         self.ArrowRotation = self.ArrowRotation + self.turnRate
     elseif love.keyboard.isDown("lshift") then
-        self.angSin = self.angSin - 0.025
-        self.speed = self.speed + 0.25
+
     elseif love.keyboard.isDown('lalt') then
-        self.angSin = self.angSin + 0.025
-        self.speed = self.speed - 0.25
+        
     end
 
     self.cos = math.cos(self.ArrowRotation)
@@ -182,7 +184,8 @@ function Player:draw()
     love.graphics.setFont(love.graphics.newFont(12))
 
     love.graphics.draw(self.Image, self.x, self.y)
-    love.graphics.draw(self.ArrowImage, self.x + self.Rad, self.y + self.Rad, self.ArrowRotation, 1, 1, self.OriginX, self.OriginY)
+    love.graphics.draw(self.ArrowImage, self.x + self.cos * 20 + self.Rad, self.y + self.sin * 20 + self.Rad, self.ArrowRotation, 1, 1, self.OriginX, self.OriginY)
+    -- love.graphics.draw(self.ArrowImage, self.x + self.Rad, self.y + self.Rad, self.ArrowRotation, 1, 1, self.OriginX, self.OriginY)
 end
 
 
@@ -214,6 +217,43 @@ function Player:IsInRange(x, y, Range)
         return true
     else
         return false
+    end
+end
+
+function Player:keypressed(key)
+    if ui.GameStarted then
+        player:setAngleWithWASD(key)
+
+        if key == 'g' and ability == false and player.spec == false and SlowMo >= 1 and abilities.canTmp then
+            ability = true
+
+        elseif key == 'r' and ability == false and player.spec == false and abilities.canSlowmo then
+            if SlowMo < 1 then
+                SlowMo = 1
+            else
+                SlowMo = 0.1
+            end
+        elseif key == 'space' then
+            self.speed = self.speed + 175
+        end
+    end
+end
+
+function Player:mousepressed(X, Y, button, isTouch)
+    if ui.GameStarted then
+        if ability and posCounter < 6 then
+            table.insert(player.abilityPos, { X * SCALE_FACTOR, Y * SCALE_FACTOR })
+            posCounter = posCounter + 1 
+        end
+
+        if posCounter >= 6 then
+            posCounter = 0
+            ability = false
+        end
+
+        if button == 2 and abilities.canFollowMouse then
+            player.followMouse = true
+        end
     end
 end
 
