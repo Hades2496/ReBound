@@ -9,15 +9,19 @@ function love.load()
     Class = require "class"
     suit = require "SUIT"
 
-    require "Map"
     require "Player"
-    require "Enemy"
+    require "Enemies/Boss"
+    require "Enemies/Enemy"
+    require "Enemies/MeleeDude"
     require "Bullet"
     require "Barriers"
     require "Camera"
     require "UI/MainUI"
     require "UI/SettingsTab"
     require "UI/Shop"
+    require "UI/MapUI"
+    require "Levels/Map"
+    require "Levels/Level1"
 
     ui = UI()
 
@@ -38,6 +42,7 @@ function love.load()
 
     startTimer = 3
     
+    inMapUI = false
     inShop = false
     inSettings = false
     paused = false
@@ -56,7 +61,7 @@ end
 function love.update(dt)
     YSBG:setVolume(musicSlider.value / 10)
 
-    if ui.GameStarted then
+    if ui.GameStarted and not didWin and not didLose and not inSettings then
        if player.x > love.graphics.getWidth() / 2 then
             camera.x = player.x - love.graphics.getWidth() / 2
        end
@@ -98,46 +103,34 @@ function love.update(dt)
 
     if inSettings then
         set:update(dt)
+        camera.x = 0
+        camera.y = 0
+    end
+
+    if inMapUI then
+        mapui:update(dt)
     end
 
     if inShop then
         shop:update(dt)
     end
     
-    if not inSettings and not ui.GameStarted and not inShop then
+    if not inSettings and not ui.GameStarted and not inShop and not inMapUI then
         ui:update(dt)
-    end
-    
-    if ui.Constructor and not inSettings then
-        player = Player()
-        map = Map(360)
-        
-        Enemies = {}
-        
-        for i = 1, 6 do
-            table.insert(Enemies, Enemy(math.random(0, WINDOW_WIDTH), math.random(0, WINDOW_HEIGHT)))
-        end
-
-        ui.Constructor = false
     end
     
     if not paused then
         if ui.GameStarted and startTimer <= 1 and didWin == false and didLose == false then
-            player:update(dt)
             map:update(dt)
-            
-            for i, v in ipairs(Enemies) do
-                v:update(dt)
-            end 
         end
     end
 end 
 
 function love.draw()
     camera:set()
-        
-    suit.draw()
 
+    suit.draw()
+    
     if inSettings then
         set:draw()
     end
@@ -145,11 +138,6 @@ function love.draw()
     if ui.GameStarted then
         if not inSettings and didLose == false and didWin == false then
             map:draw()
-            player:draw()
-            
-            for i, v in ipairs(Enemies) do
-                v:draw()
-            end 
         end
     end
     
@@ -158,13 +146,21 @@ function love.draw()
         love.graphics.print(math.floor(startTimer), WINDOW_WIDTH / (2 * SCALE_FACTOR) - 20, WINDOW_HEIGHT / (2 * SCALE_FACTOR) - 6)
         love.graphics.setFont(love.graphics.newFont(12))
     end
+    
+    -- love.graphics.print("GS: "..tostring(ui.GameStarted).. "  IS: "..tostring(inSettings).. "  dl: ".. tostring(didLose).. "  dW: ".. tostring(didWin), 100, 100)
 
     camera:unset()
 end
 
 function love.keypressed(key)
     if key == 'escape' then
-        love.event.quit()
+        if ui.GameStarted then
+            set = Settings()
+            inSettings = true
+            paused = true
+        else
+            love.event.quit()
+        end
     end
 
     if ui.GameStarted and startTimer < 1 then

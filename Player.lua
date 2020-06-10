@@ -2,7 +2,7 @@ Player = Class:extend()
 
 function Player:new()
     self.Image = love.graphics.newImage("Images/PlayerImage.png")
-    self.ArrowImage = love.graphics.newImage("Images/arrow.jpg")
+    self.ArrowImage = love.graphics.newImage("Images/Arrow.jpg")
 
     self.ArrowRotation = math.rad(math.random(360))
     self.Rad = self.Image:getWidth() / 2
@@ -23,10 +23,9 @@ function Player:new()
     self.OriginY = self.ArrowImage:getHeight() / 2
 
     self.speed = 300
-    self.turnRate = 0.025
-    self.OSpeed = 0
+    self.turnRate = 0.05
 
-    self.health = 1
+    self.health = 100
 
     self.SpeedIncRate = 1.1  
     self.SpeedDecRate = 0.7
@@ -62,11 +61,9 @@ function Player:update(dt)
         self.canBoost = false
     end
 
-    if self.followMouse-- and self:IsInRange(love.mouse.getY() * SCALE_FACTOR, love.mouse.getX() * SCALE_FACTOR, 50) 
-    then
-        self.ArrowRotation = math.atan2(love.mouse.getY() * SCALE_FACTOR - self.y, love.mouse.getX() * SCALE_FACTOR - self.x)
-        self.angCos = math.cos(self.ArrowRotation)
-        self.angSin = math.sin(self.ArrowRotation)
+    if self.followMouse then
+        self.ArrowRotation = math.atan2((love.mouse.getY() + camera.y)- self.y, (love.mouse.getX() + camera.x)- self.x)
+        self:Collided()
     end
 
     if killed then
@@ -242,7 +239,7 @@ end
 function Player:mousepressed(X, Y, button, isTouch)
     if ui.GameStarted then
         if ability and posCounter < 6 then
-            table.insert(player.abilityPos, { X * SCALE_FACTOR, Y * SCALE_FACTOR })
+            table.insert(player.abilityPos, { X + camera.x, Y + camera.y })
             posCounter = posCounter + 1 
         end
 
@@ -251,7 +248,7 @@ function Player:mousepressed(X, Y, button, isTouch)
             ability = false
         end
 
-        if button == 2 and abilities.canFollowMouse then
+        if button == 2 and abilities.canFollowMouse and not ability and not player.spec then
             player.followMouse = true
         end
     end
