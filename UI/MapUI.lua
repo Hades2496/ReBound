@@ -17,6 +17,7 @@ function MapUI:update(dt)
         ui.Constructor = true
         ui.GameStarted = true
         inMapUI = false
+        
     end
 
     if suit.Button("Level 3", WINDOW_WIDTH / (2 * SCALE_FACTOR) + 50, WINDOW_HEIGHT / (2 * SCALE_FACTOR) - 100, 100, 50).hit and credit > 10000 then

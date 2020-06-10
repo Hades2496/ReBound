@@ -17,6 +17,7 @@ function Map:update(dt)
     end 
 
     player:update(dt)
+    
 end
 
 function Map:draw()
